@@ -1,0 +1,3 @@
+type Incidents struct {
+	
+}

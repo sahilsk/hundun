@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -34,7 +35,15 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("incidents called")
-		err := pgclient.List("incidents")
+		var filters = make(map[string]string)
+
+		incidentList, err := pgclient.List("incidents", filters)
+		log.Printf("Incident: %s", incidentList.Incidents[0].Summary)
+		//log.Printf("%+v", incidentList)
+
+		//Print pretty json
+		data, _ := json.MarshalIndent(incidentList, "", "  ")
+		log.Printf("%s", string(data))
 
 		if err != nil {
 			log.Fatalf("Can't pull incidents: %s", err)

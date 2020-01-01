@@ -1,12 +1,14 @@
 package pgclient
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 
 	d "github.com/sahilsk/hundun/dialer"
+	ps "github.com/sahilsk/hundun/pgclient/schema"
 )
 
 type PgClient struct {
@@ -27,26 +29,56 @@ func (p *PgClient) Init() {
 	p.Dialer.InitClient()
 }
 
+type requestFilter struct {
+	Since       string
+	Until       string
+	DateRange   string
+	Statuses    []string
+	IncidentKey string
+	ServiceIds  []string
+	TeamIds     []string
+	UserIds     []string
+	Urgencies   []string
+	TimeZone    string
+	SortBy      string
+	Include     []string
+}
+
+type RequestFilter interface{}
+
+func New(since, until, DateRange) RequestFilter {
+	return requestFilter{name, 0}
+}
+
+func ConvertToQueryString(v RequestFilter) {
+	var queryString []byte
+
+}
+
 /**
  * List.
  *
  * @author	Unknown
- * @since	v0.0.1
- * @version	v1.0.0	Sunday, December 29th, 2019.
+ * @var		p	*PgClien
  * @global
- * @param	entity	string
- * @return	void
  */
-func (p *PgClient) List(entity string) error {
+func (p *PgClient) List(entity string, filters RequestFilter) (ps.IncidentsResponse, error) {
+	var incident ps.IncidentsResponse
+
 	if entity == "" {
-		return errors.New("no entity defined")
+		return incident, errors.New("no entity defined")
+	}
+	if filters {
+
 	}
 
-	err := p.Dialer.Get(fmt.Sprintf("%s/%s", p.Endpoint, "incidents"))
+	body, err := p.Dialer.Get(fmt.Sprintf("%s/%s", p.Endpoint, entity))
 	if err != nil {
 		log.Fatal(err)
+		return incident, err
 	}
 
-	return nil
+	json.Unmarshal(body, &incident)
 
+	return incident, nil
 }

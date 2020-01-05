@@ -1,5 +1,5 @@
 /*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 NAME HERE <EMAIL ADDRESS>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,46 +21,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// getCmd represents the get command
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "print list of entity",
-	Long: `List <subcommand> . For example:
+// escalateCmd represents the escalate command
+var escalateCmd = &cobra.Command{
+	Use:   "escalate",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
 
-hundun get alerts`,
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("get called")
-
+		fmt.Println("escalate called")
 	},
 }
 
-type Filters struct {
-	since       string
-	until       string
-	dateRange   string
-	statuses    []string
-	incidentKey string
-	serviceIds  []string
-	teamIds     []string
-	userIds     []string
-	urgencies   []string
-	timeZone    string
-	sortBy      []string
-	include     []string
-}
-
-var filters = Filters{}
-
 func init() {
-	rootCmd.AddCommand(getCmd)
+	rootCmd.AddCommand(escalateCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// getCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// escalateCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// escalateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

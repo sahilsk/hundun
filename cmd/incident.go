@@ -16,10 +16,15 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+
+	"log"
 
 	"github.com/spf13/cobra"
 )
+
+var incidentId string
 
 // incidentCmd represents the incident command
 var incidentCmd = &cobra.Command{
@@ -33,11 +38,24 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("incident called")
+
+		incident, err := pgclient.Get("incident", incidentId)
+		if err != nil {
+			log.Fatalf("Error: %s", err)
+		}
+
+		log.Printf("%+v", incident)
+		incidentStr, err := json.MarshalIndent(incident, "", "  ")
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+		log.Print("%s", string(incidentStr))
 	},
 }
 
 func init() {
 	describeCmd.AddCommand(incidentCmd)
+	incidentCmd.Flags().StringVar(&incidentId, "id", "", "Incident id")
 
 	// Here you will define your flags and configuration settings.
 

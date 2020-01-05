@@ -1,5 +1,17 @@
 package schema
 
+import (
+	"encoding/json"
+)
+
+type Entity struct {
+	Id      string `json:id"`
+	Type    string `json:"type"`
+	Summary string `json:"summary"`
+	Self    string `json:"self"`
+	HtmlUrl string `json:"html_url"`
+}
+
 type IncidentResponse struct {
 	Incident Incident
 }
@@ -13,49 +25,38 @@ type IncidentsResponse struct {
 }
 
 type Incident struct {
-	Id                    string               `json:id`
-	Type                  string               `json:type`
-	Summary               string               `json:summary`
-	Self                  string               `json:self`
-	Html_url              string               `json:html_url`
-	Incident_number       string               `json:incident_number`
+	Entity
+	Incident_number       uint                 `json:incident_number`
 	Created_at            string               `json:created_at`
 	Status                string               `json:status`
 	Title                 string               `json:title`
 	ResolveReason         string               `json:resolve_reason`
 	AlertCounts           AlertCounts          `json:alert_counts`
-	PendingActions        []PendingAction      `json:pending_actions`
-	Incident_key          string               `json:incident_key`
-	Service               Service              `json:service`
-	Priority              string               `json:priority`
-	Assigned_via          string               `json:assigned_via`
+	IsMergeable           bool                 `json:"is_mergeable"`
+	PendingActions        []PendingAction      `json:"pending_actions"`
+	IncidentKey           string               `json:"incident_key"`
+	Service               Service              `json:"service"`
+	Priority              Priority             `json:"priority"`
+	Assigned_via          string               `json:"assigned_via"`
 	Assignments           []Assignment         `json:assignments`
 	Acknowledgements      []Acknowledgement    `json:acknowledgemnts`
-	Last_status_change_at string               `json:last_status_change_at`
-	LastStatusChangeBy    LastStatusChangeBy   `json:last_status_change_by`
-	FirstTriggerLogEntry  FirstTriggerLogEntry `json:first_trigger_log_entry`
-	EscalationPolicy      EscalationPolicy     `json:escalation_policy`
+	Last_status_change_at string               `json:"last_status_change_at"`
+	LastStatusChangeBy    LastStatusChangeBy   `json:"last_status_change_by"`
+	FirstTriggerLogEntry  FirstTriggerLogEntry `json:"first_trigger_log_entry"`
+	EscalationPolicy      EscalationPolicy     `json:"escalation_policy"`
 	Teams                 []Team               `json:teams`
 	Urgency               string               `json:urgency`
 }
 
 type AlertCounts struct {
-	All       uint   `json:all`
-	Triggered string `json:triggered`
-	Resolved  uint   `json:resolved`
+	All       uint `json:"all"`
+	Triggered uint `json:"triggered"`
+	Resolved  uint `json:"resolved"`
 }
 
 type PendingAction struct {
 	Type string
 	at   string
-}
-
-type Entity struct {
-	Id      string
-	Type    string
-	Summary string
-	Self    string
-	HtmlUrl string
 }
 
 type Service struct {
@@ -98,4 +99,12 @@ type EscalationPolicy struct {
 
 type Team struct {
 	Entity
+}
+
+func (ir *IncidentsResponse) ToPrettyString() ([]byte, error) {
+	return json.MarshalIndent(*ir, "", "  ")
+}
+
+func (ir *IncidentsResponse) ToString() ([]byte, error) {
+	return json.Marshal(*ir)
 }

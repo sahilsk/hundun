@@ -111,8 +111,8 @@ func initConfig() {
 	}
 
 
-	if hundunConfig.Pagerduty.ApiKey == "" {
-		log.Fatalf("Please make sure your config file has api key and endpoint to connect to.")
+	if hundunConfig.Pagerduty.ApiKey == "" || hundunConfig.Pagerduty.Url == "" {
+		log.Fatalf("Please make sure your config file has api key and pagerduty api url to connect to.")
 	}
 }
 

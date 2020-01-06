@@ -17,8 +17,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
+	"log"
 
 	homedir "github.com/mitchellh/go-homedir"
 	c "github.com/sahilsk/hundun/config"
@@ -31,6 +31,7 @@ var cfgFile string
 
 var hundunConfig c.HundunConfig
 var pgclient *pg.PgClient
+
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -59,6 +60,8 @@ func Execute() {
 }
 
 func init() {
+	log.SetFlags( log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile )
+	
 	cobra.OnInitialize(initConfig)
 
 	cobra.OnInitialize(initPgClient)
@@ -92,6 +95,8 @@ func initConfig() {
 		viper.AddConfigPath(".")
 		viper.AddConfigPath("$HOME/.config")
 		viper.SetConfigName(".hundun")
+		viper.SetDefault("pagerduty.email", "")
+
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -105,6 +110,7 @@ func initConfig() {
 		log.Fatalf("unable to marshal config to YAML: %v", err)
 	}
 
+
 	if hundunConfig.Pagerduty.ApiKey == "" {
 		log.Fatalf("Please make sure your config file has api key and endpoint to connect to.")
 	}
@@ -117,6 +123,7 @@ func initPgClient() {
 	pgclient = &pg.PgClient{
 		ApiKey:   hundunConfig.Pagerduty.ApiKey,
 		Endpoint: hundunConfig.Pagerduty.Url,
+		Email: hundunConfig.Pagerduty.Email,
 	}
 	pgclient.Init()
 

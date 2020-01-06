@@ -54,13 +54,30 @@ func jsonFactory(s string) io.ReadCloser {
 	return ioutil.NopCloser(strings.NewReader(s))
 }
 
+func printAndReturn(r io.Reader, sc int) ([]byte, error) {
+
+	body, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
+	if sc > 399 {
+		return nil, errors.New(string(body))
+	} else {
+		log.Print(string(body))
+	}
+
+	return body, err
+}
+
 /**
  * @var		d	*Dialer
  * @global
  */
 func (d *Dialer) Get(endpoint string, params url.Values) ([]byte, error) {
-	log.Printf("(GET)Dailing url: %s", endpoint)
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s?%s", endpoint, params.Encode()), nil)
+	requestURL := fmt.Sprintf("%s?%s", endpoint, params.Encode())
+	log.Printf("(GET)Dailing url: %s", requestURL)
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -70,19 +87,7 @@ func (d *Dialer) Get(endpoint string, params url.Values) ([]byte, error) {
 		return nil, err
 	}
 	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	log.Print(string(body))
-
-	if res.StatusCode > 399 {
-		return nil, errors.New(string(body))
-	}
-
-	return body, err
-	//return nil
+	return printAndReturn(res.Body, res.StatusCode)
 }
 
 /**
@@ -90,10 +95,11 @@ func (d *Dialer) Get(endpoint string, params url.Values) ([]byte, error) {
  * @global
  */
 func (d *Dialer) Put(endpoint string, params url.Values, body []byte) ([]byte, error) {
-	log.Printf("(PUT)Dailing url: %s", fmt.Sprintf("%s", endpoint))
+	requestURL := fmt.Sprintf("%s?%s", endpoint, params.Encode())
+	log.Printf("(PUT)Dailing url: %s", requestURL)
 	log.Printf("Payload: %s", string(body))
-	//req, err := http.NewRequest("PUT", fmt.Sprintf("%s?%s", endpoint, params.Encode()), bytes.NewReader(body))
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s", endpoint), bytes.NewReader(body))
+
+	req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewReader(body))
 
 	if err != nil {
 		return nil, err
@@ -104,15 +110,5 @@ func (d *Dialer) Put(endpoint string, params url.Values, body []byte) ([]byte, e
 		return nil, err
 	}
 	defer res.Body.Close()
-
-	log.Printf("Status Code: %d", res.StatusCode)
-
-	body, err = ioutil.ReadAll(res.Body)
-	log.Printf("body: %s", body)
-
-	if res.StatusCode > 399 {
-		return nil, errors.New(string(body))
-	}
-	return body, err
-
+	return printAndReturn(res.Body, res.StatusCode)
 }

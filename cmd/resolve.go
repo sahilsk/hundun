@@ -16,7 +16,10 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"net/url"
 
 	"github.com/spf13/cobra"
 )
@@ -33,11 +36,42 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("resolve called")
+
+		incidentResolvePayloadJSON := []byte(fmt.Sprintf(`
+		{
+			"incident": {
+			  "type": "incident_reference",
+			  "status": "resolved",
+			  "resolution": "%s"
+			}
+		}
+		`, resolveParams.resolution))
+
+		incident, err := pgclient.Put("incidents", resolveParams.incidentID, url.Values{}, incidentResolvePayloadJSON)
+		if err != nil {
+			log.Fatalf("Error: %s", err)
+		}
+
+		log.Printf("%+v", incident)
+		incidentStr, err := json.MarshalIndent(incident, "", "  ")
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+		log.Print(string(incidentStr))
 	},
 }
 
+type ResolveParams struct {
+	incidentID string
+	resolution string
+}
+
+var resolveParams ResolveParams
+
 func init() {
 	rootCmd.AddCommand(resolveCmd)
+	resolveCmd.Flags().StringVar(&resolveParams.incidentID, "id", "", "Incident id")
+	resolveCmd.Flags().StringVar(&resolveParams.resolution, "resolution", "", "The resolution for this incident.")
 
 	// Here you will define your flags and configuration settings.
 

@@ -15,16 +15,19 @@ import (
 type PgClient struct {
 	ApiKey   string
 	Endpoint string
+	Email    string
 	Dialer   *d.Dialer
 }
 
+//Init initializes pagerduty client with headers and pg endpoint
 func (p *PgClient) Init() {
 	log.Print("init pg client")
 	p.Dialer = &d.Dialer{
 		HeaderList: http.Header{
 			"Authorization": []string{fmt.Sprintf("Token token=%s", p.ApiKey)},
 			"Accept":        []string{"application/vnd.pagerduty+json;version=2"},
-			"From":          []string{"smeena@itbit.com"},
+			"From":          []string{p.Email},
+			"Content-Type":  []string{"application/json"},
 		},
 		Url: p.Endpoint,
 	}
@@ -47,75 +50,99 @@ type RequestFilter struct {
 	Include     []string
 }
 
-func (rf *RequestFilter) ToQueryString() string {
-	log.Printf("ToQueryString called")
-	return "sdf"
-}
-
-/**
- * List.
- *
- * @author	Unknown
- * @var		p	*PgClien
- * @global
- */
-func (p *PgClient) List(entity string, filters url.Values) (ps.IncidentsResponse, error) {
-	var incident ps.IncidentsResponse
+//List sends a GET request to fetcha all listings of the specified entity
+//filtered through query parameters
+func (p *PgClient) List(entity string, filters url.Values) (interface{}, error) {
 
 	if entity == "" {
-		return incident, errors.New("no entity defined")
+		return nil, errors.New("no entity defined")
 	}
 
 	body, err := p.Dialer.Get(fmt.Sprintf("%s/%s", p.Endpoint, entity), filters)
 	if err != nil {
-		log.Fatal(err)
-		return incident, err
+		return nil, err
 	}
 
-	if err := json.Unmarshal(body, &incident); err != nil {
-		log.Fatal(err)
+	switch entity {
+	case "incidents":
+		var incidents ps.IncidentsResponse
+		if err := json.Unmarshal(body, &incidents); err != nil {
+			log.Fatal(err)
+		}
+		return incidents, nil
+	case "priorities":
+		var priorities ps.Priorities
+		if err := json.Unmarshal(body, &priorities); err != nil {
+			log.Fatal(err)
+		}
+		return priorities, err
+	default:
+		return nil, errors.New("Unsupported entity")
 	}
 
-	return incident, nil
 }
 
-func (p *PgClient) Get(entity string, id string) (ps.IncidentResponse, error) {
-	var incident ps.IncidentResponse
+//Get sends a GET request to pagerduty to fetch the specified entity
+func (p *PgClient) Get(entity string, id string) (interface{}, error) {
+
+	requestURL := fmt.Sprintf("%s/%s/%s", p.Endpoint, entity, id)
 
 	if entity == "" {
-		return incident, errors.New("no entity defined")
+		return nil, errors.New("no entity passed")
 	}
 
-	body, err := p.Dialer.Get(fmt.Sprintf("%s/%s/%s", p.Endpoint, entity, id), url.Values{})
+	body, err := p.Dialer.Get(requestURL, url.Values{})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
+	}
+
+	switch entity {
+	case "incidents":
+		var incident ps.IncidentResponse
+		if err := json.Unmarshal(body, &incident); err != nil {
+			log.Fatal(err)
+		}
 		return incident, err
+	case "priorities":
+		var priority ps.PriorityResponse
+		if err := json.Unmarshal(body, &priority); err != nil {
+			log.Fatal(err)
+		}
+		return priority, nil
+	default:
+		return nil, errors.New("Unsupported entity")
 	}
 
-	if err := json.Unmarshal(body, &incident); err != nil {
-		log.Fatal(err)
-	}
-
-	return incident, nil
 }
 
-func (p *PgClient) Put(entity string, id string, params url.Values, payload []byte) (ps.IncidentResponse, error) {
-	var incident ps.IncidentResponse
+//Put send a PUT request to pg endpoints along with query params and json payload
+//Use this to make a PUT request to update 'entity' with data provided
+func (p *PgClient) Put(entity string, id string, params url.Values, payload []byte) (interface{}, error) {
+	requestURL := fmt.Sprintf("%s/%s/%s", p.Endpoint, entity, id)
 
 	if entity == "" {
-		return incident, errors.New("no entity defined")
+		return nil, errors.New("no entity passed")
 	}
 
-	body, err := p.Dialer.Put(fmt.Sprintf("%s/%s/%s", p.Endpoint, entity, id),
-		params, payload)
+	body, err := p.Dialer.Put(requestURL, params, payload)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
+	}
+
+	switch entity {
+	case "incidents":
+		var incident ps.IncidentResponse
+		if err := json.Unmarshal(body, &incident); err != nil {
+			log.Fatal(err)
+		}
 		return incident, err
+	case "priorities":
+		var priority ps.Priority
+		if err := json.Unmarshal(body, &priority); err != nil {
+			log.Fatal(err)
+		}
+		return priority, nil
+	default:
+		return nil, errors.New("Unsupported entity")
 	}
-
-	if err := json.Unmarshal(body, &incident); err != nil {
-		log.Fatal(err)
-	}
-
-	return incident, nil
 }

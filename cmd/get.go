@@ -35,18 +35,19 @@ hundun get alerts`,
 }
 
 type Filters struct {
-	since       string
-	until       string
-	dateRange   string
-	statuses    []string
-	incidentKey string
-	serviceIds  []string
-	teamIds     []string
-	userIds     []string
-	urgencies   []string
-	timeZone    string
-	sortBy      []string
-	include     []string
+	since         string
+	sinceRelative string
+	until         string
+	dateRange     string
+	statuses      []string
+	incidentKey   string
+	serviceIds    []string
+	teamIds       []string
+	userIds       []string
+	urgencies     []string
+	timeZone      string
+	sortBy        []string
+	include       []string
 }
 
 var filters = Filters{}

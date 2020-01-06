@@ -1,5 +1,5 @@
 /*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 NAME HERE <EMAIL ADDRESS>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,16 +18,15 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-
 	"log"
 
 	ps "github.com/sahilsk/hundun/pgclient/schema"
 	"github.com/spf13/cobra"
 )
 
-// incidentCmd represents the incident command
-var incidentCmd = &cobra.Command{
-	Use:   "incident",
+// priorityCmd represents the priority command
+var priorityCmd = &cobra.Command{
+	Use:   "priority",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -36,40 +35,39 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("incident called")
-
-		iv, err := pgclient.Get("incidents", incidentParams.incidentID)
+		fmt.Println("priority called")
+		iv, err := pgclient.Get("priorities", priorityParams.id)
 		if err != nil {
 			log.Fatalf("Error: %s", err)
 		}
-		incident := iv.(ps.IncidentResponse)
+		priority := iv.(ps.PriorityResponse)
 
-		log.Printf("%+v", incident)
-		incidentStr, err := json.MarshalIndent(incident, "", "  ")
+		log.Printf("%+v", priority)
+		priorityStr, err := json.MarshalIndent(priority, "", "  ")
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
-		log.Print(string(incidentStr))
+		log.Print(string(priorityStr))
 	},
 }
 
-type IncidentParams struct {
-	incidentID string
+type PriorityParams struct {
+	id string
 }
 
-var incidentParams IncidentParams
+var priorityParams PriorityParams
 
 func init() {
-	describeCmd.AddCommand(incidentCmd)
-	incidentCmd.Flags().StringVar(&incidentParams.incidentID, "id", "", "Incident id")
+	describeCmd.AddCommand(priorityCmd)
+	priorityCmd.Flags().StringVar(&priorityParams.id, "id", "", "Incident id")
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// incidentCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// priorityCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// incidentCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// priorityCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

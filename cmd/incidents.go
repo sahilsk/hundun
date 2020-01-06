@@ -19,7 +19,9 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"time"
 
+	ps "github.com/sahilsk/hundun/pgclient/schema"
 	"github.com/spf13/cobra"
 )
 
@@ -50,12 +52,23 @@ to quickly create a Cobra application.`,
 		queryParams["sort_by[]"] = filters.sortBy
 		queryParams["include[]"] = filters.include
 
-		incidentList, err := pgclient.List("incidents", queryParams)
+		if filters.sinceRelative != "" {
+			m, _ := time.ParseDuration(fmt.Sprintf("-%s", filters.sinceRelative))
+			now := time.Now().UTC()
+			then := now.Add(m)
+			thenFormatted := then.Format(time.RFC3339)
+			log.Printf("Since Relative: %s", thenFormatted)
+			queryParams["since"] = []string{thenFormatted}
+		}
+
+		iv, err := pgclient.List("incidents", queryParams)
+		incidentList := iv.(ps.IncidentsResponse)
 
 		//log.Printf("%+v", incidentList)
 
 		//Print pretty json
 		data, _ := incidentList.ToPrettyString()
+
 		log.Printf("%s", string(data))
 
 		log.Printf("Total records fetched: %d", len(incidentList.Incidents))
@@ -95,5 +108,13 @@ func init() {
 	incidentsCmd.Flags().StringVar(&filters.timeZone, "time_zone", "UTC", "Time zone in which dates in the result will be rendered.")
 	incidentsCmd.Flags().StringArrayVar(&filters.sortBy, "sort_by", []string{}, `Used to specify both the field you wish to sort the results on (incident_number/created_at/resolved_at/urgency), as well as the direction (asc/desc) of the results. The sort_by field and direction should be separated by a colon. A maximum of two fields can be included, separated by a comma. Sort direction defaults to ascending. The account must have the urgencies ability to sort by the urgency.`)
 	incidentsCmd.Flags().StringArrayVar(&filters.include, "include", []string{}, "Include: users, services, etc")
+
+	incidentsCmd.Flags().StringVar(&filters.sinceRelative, "since_relative", "", `
+					Relative duration to fetch incidents since. 
+					eg. '1m30s' retrives incidents created 90seconds ago. 
+					A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix,
+					such as "300ms", "-1.5h" or "2h45m". 
+					Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+					`)
 
 }

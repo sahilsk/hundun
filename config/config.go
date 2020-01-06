@@ -15,4 +15,5 @@ type HundunConfig struct {
 type PagerdutyConfiguration struct {
 	ApiKey string `mapstructure:"api_key"`
 	Url    string `mapstructure:"url"`
+	Email  string `mapstructure:"email"`
 }

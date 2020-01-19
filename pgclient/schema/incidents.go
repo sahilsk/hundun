@@ -2,6 +2,7 @@ package schema
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 )
 
@@ -87,10 +88,34 @@ type Team struct {
 	Entity
 }
 
-func (ir *IncidentsResponse) ToPrettyString() ([]byte, error) {
-	return json.MarshalIndent(*ir, "", "  ")
+func (ir *IncidentsResponse) ToPrettyString() string {
+	b, err := json.MarshalIndent(*ir, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
 }
 
-func (ir *IncidentsResponse) ToString() ([]byte, error) {
-	return json.Marshal(*ir)
+func (ir *IncidentsResponse) ToString() string {
+	b, err := json.Marshal(*ir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
+}
+
+func (ir *IncidentResponse) ToPrettyString() string {
+	b, err := json.MarshalIndent(*ir, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
+}
+
+func (ir *IncidentResponse) ToString() string {
+	b, err := json.Marshal(*ir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
 }

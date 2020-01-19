@@ -6,17 +6,21 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
+
+	log "github.com/sahilsk/hundun/logger"
 )
 
 type Dialer struct {
 	HeaderList http.Header
 	Url        string
 	Client     *http.Client
+	Verbose    bool
 }
+
+var logger *log.Clogger
 
 /**
  * @var		d	*Diale
@@ -24,6 +28,7 @@ type Dialer struct {
  */
 func (d *Dialer) InitClient() {
 	d.Client = &http.Client{}
+	logger = log.NewLogger(d.Verbose)
 }
 
 /**
@@ -32,7 +37,8 @@ func (d *Dialer) InitClient() {
  */
 func (d *Dialer) AddHeader(k, v string) {
 	d.HeaderList.Add(k, v)
-	log.Printf("Key: %s:%s", k, d.HeaderList.Get(k))
+	logger.Info("Key: %s:%s", k, d.HeaderList.Get(k))
+
 }
 
 /**
@@ -62,9 +68,9 @@ func printAndReturn(r io.Reader, sc int) ([]byte, error) {
 	}
 
 	if sc > 399 {
-		return nil, errors.New(string(body))
+		return nil, errors.New(fmt.Sprintf("(StatusCode: %d: %s", sc, string(body)))
 	} else {
-		log.Print(string(body))
+		logger.Info(string(body))
 	}
 
 	return body, err
@@ -76,7 +82,8 @@ func printAndReturn(r io.Reader, sc int) ([]byte, error) {
  */
 func (d *Dialer) Get(endpoint string, params url.Values) ([]byte, error) {
 	requestURL := fmt.Sprintf("%s?%s", endpoint, params.Encode())
-	log.Printf("(GET)Dailing url: %s", requestURL)
+	logger.Info("(GET)Dailing url: %s", requestURL)
+
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		return nil, err
@@ -84,6 +91,7 @@ func (d *Dialer) Get(endpoint string, params url.Values) ([]byte, error) {
 	req.Header = d.HeaderList
 	res, err := d.Client.Do(req)
 	if err != nil {
+		logger.Info("%s", err)
 		return nil, err
 	}
 	defer res.Body.Close()
@@ -96,8 +104,9 @@ func (d *Dialer) Get(endpoint string, params url.Values) ([]byte, error) {
  */
 func (d *Dialer) Put(endpoint string, params url.Values, body []byte) ([]byte, error) {
 	requestURL := fmt.Sprintf("%s?%s", endpoint, params.Encode())
-	log.Printf("(PUT)Dailing url: %s", requestURL)
-	log.Printf("Payload: %s", string(body))
+
+	logger.Info("(PUT)Dailing url: %s", requestURL)
+	logger.Info("Payload: %s", string(body))
 
 	req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewReader(body))
 

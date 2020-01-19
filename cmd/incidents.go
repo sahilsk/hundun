@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"time"
 
@@ -36,7 +35,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("incidents called")
+		logger.Info("incidents called")
 		var queryParams url.Values = url.Values{}
 
 		queryParams["since"] = []string{filters.since}
@@ -57,27 +56,27 @@ to quickly create a Cobra application.`,
 			now := time.Now().UTC()
 			then := now.Add(m)
 			thenFormatted := then.Format(time.RFC3339)
-			log.Printf("Since Relative: %s", thenFormatted)
+			logger.Info("Since Relative: %s", thenFormatted)
 			queryParams["since"] = []string{thenFormatted}
 		}
 
 		iv, err := pgclient.List("incidents", queryParams)
+		if err != nil {
+			logger.Fatal("Error fetching incidents: %s", err)
+		}
 		incidentList := iv.(ps.IncidentsResponse)
 
-		//log.Printf("%+v", incidentList)
+		logger.Info("%v", incidentList)
 
-		//Print pretty json
-		data, _ := incidentList.ToPrettyString()
+		fmt.Printf("%s", incidentList.ToPrettyString())
 
-		log.Printf("%s", string(data))
-
-		log.Printf("Total records fetched: %d", len(incidentList.Incidents))
+		logger.Info("Total records fetched: %d", len(incidentList.Incidents))
 		if len(incidentList.Incidents) > 0 {
-			log.Printf("Incident: %s", incidentList.Incidents[0].Summary)
+			logger.Info("Incident: %s", incidentList.Incidents[0].Summary)
 		}
 
 		if err != nil {
-			log.Fatalf("Can't pull incidents: %s", err)
+			logger.Fatal("Can't pull incidents: %s", err)
 		}
 	},
 }

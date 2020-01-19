@@ -4,24 +4,43 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
+
+	log "github.com/sahilsk/hundun/logger"
 
 	d "github.com/sahilsk/hundun/dialer"
 	ps "github.com/sahilsk/hundun/pgclient/schema"
 )
+
+var logger *log.Clogger
 
 type PgClient struct {
 	ApiKey   string
 	Endpoint string
 	Email    string
 	Dialer   *d.Dialer
+	Verbose  bool
+}
+
+func NewPgClient(apikey string, endpoint string, email string, verbose bool) *PgClient {
+
+	pgclient := &PgClient{
+		ApiKey:   apikey,
+		Endpoint: endpoint,
+		Email:    email,
+		Verbose:  verbose,
+	}
+
+	logger = log.NewLogger(verbose)
+
+	pgclient.Init()
+	return pgclient
 }
 
 //Init initializes pagerduty client with headers and pg endpoint
 func (p *PgClient) Init() {
-	log.Print("init pg client")
+
 	p.Dialer = &d.Dialer{
 		HeaderList: http.Header{
 			"Authorization": []string{fmt.Sprintf("Token token=%s", p.ApiKey)},
@@ -29,7 +48,8 @@ func (p *PgClient) Init() {
 			"From":          []string{p.Email},
 			"Content-Type":  []string{"application/json"},
 		},
-		Url: p.Endpoint,
+		Url:     p.Endpoint,
+		Verbose: p.Verbose,
 	}
 	p.Dialer.InitClient()
 }
@@ -67,13 +87,15 @@ func (p *PgClient) List(entity string, filters url.Values) (interface{}, error) 
 	case "incidents":
 		var incidents ps.IncidentsResponse
 		if err := json.Unmarshal(body, &incidents); err != nil {
-			log.Fatal(err)
+			if p.Verbose {
+				logger.Info("%s", err)
+			}
 		}
 		return incidents, nil
 	case "priorities":
 		var priorities ps.Priorities
 		if err := json.Unmarshal(body, &priorities); err != nil {
-			log.Fatal(err)
+			logger.Info("%s", err)
 		}
 		return priorities, err
 	default:
@@ -100,13 +122,13 @@ func (p *PgClient) Get(entity string, id string) (interface{}, error) {
 	case "incidents":
 		var incident ps.IncidentResponse
 		if err := json.Unmarshal(body, &incident); err != nil {
-			log.Fatal(err)
+			logger.Info("%s", err)
 		}
 		return incident, err
 	case "priorities":
 		var priority ps.PriorityResponse
 		if err := json.Unmarshal(body, &priority); err != nil {
-			log.Fatal(err)
+			logger.Info("%s", err)
 		}
 		return priority, nil
 	default:
@@ -133,13 +155,13 @@ func (p *PgClient) Put(entity string, id string, params url.Values, payload []by
 	case "incidents":
 		var incident ps.IncidentResponse
 		if err := json.Unmarshal(body, &incident); err != nil {
-			log.Fatal(err)
+			logger.Info("%s", err)
 		}
 		return incident, err
 	case "priorities":
 		var priority ps.Priority
 		if err := json.Unmarshal(body, &priority); err != nil {
-			log.Fatal(err)
+			logger.Info("%s", err)
 		}
 		return priority, nil
 	default:

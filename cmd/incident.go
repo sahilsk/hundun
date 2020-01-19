@@ -16,10 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-
-	"log"
 
 	ps "github.com/sahilsk/hundun/pgclient/schema"
 	"github.com/spf13/cobra"
@@ -36,20 +33,17 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("incident called")
+		logger.Info("incident called")
 
 		iv, err := pgclient.Get("incidents", incidentParams.incidentID)
 		if err != nil {
-			log.Fatalf("Error: %s", err)
+			logger.Fatal("Error: %s", err)
 		}
 		incident := iv.(ps.IncidentResponse)
 
-		log.Printf("%+v", incident)
-		incidentStr, err := json.MarshalIndent(incident, "", "  ")
-		if err != nil {
-			log.Fatalf("%s", err)
-		}
-		log.Print(string(incidentStr))
+		logger.Info("%+v", incident)
+
+		fmt.Print(incident.ToPrettyString())
 	},
 }
 

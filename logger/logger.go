@@ -4,37 +4,37 @@ import (
 	"log"
 )
 
-/**
- * @var		type	CLogge
- * @global
- */
-type CLogger log.Logger
-
-/**
- * InitLogger.
- *
- * @author	Unknown
- * @since	v0.0.1
- * @version	v1.0.0	Sunday, January 5th, 2020.
- * @global
- * @return	void
- */
-func (l *CLogger) InitLogger() {
-	CLogger.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
+type Clogger struct {
+	verbose bool
 }
 
-/**
- * @var		l	*log.Logge
- * @global
- */
-func (l *CLogger) LInfo(v interface{}) {
-	log.Print(v)
+func NewLogger(verbose bool) *Clogger {
+	if !verbose {
+		log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
+	}
+	return &Clogger{verbose: verbose}
 }
 
-/**
- * @var		l	*log.Logge
- * @global
- */
-func (l *CLogger) LInfof(format string, v ...interface{}) {
-	log.Printf(format, v)
+func (c *Clogger) Info(format string, args ...interface{}) {
+	if c.verbose {
+		log.Printf(format, args)
+	}
+}
+
+func (c *Clogger) Warn(format string, args ...interface{}) {
+	if c.verbose {
+		log.Printf(format, args)
+	}
+}
+
+func (c *Clogger) Debug(format string, args ...interface{}) {
+	if c.verbose {
+		log.Printf(format, args)
+	}
+}
+
+func (c *Clogger) Fatal(format string, args ...interface{}) {
+	if c.verbose {
+		log.Fatalf(format, args)
+	}
 }

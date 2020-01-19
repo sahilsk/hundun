@@ -16,12 +16,11 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"os"
-	"log"
 
 	homedir "github.com/mitchellh/go-homedir"
 	c "github.com/sahilsk/hundun/config"
+	log "github.com/sahilsk/hundun/logger"
 	pg "github.com/sahilsk/hundun/pgclient"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -31,7 +30,8 @@ var cfgFile string
 
 var hundunConfig c.HundunConfig
 var pgclient *pg.PgClient
-
+var verbose bool
+var logger *log.Clogger
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -53,27 +53,26 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	logger = log.NewLogger(verbose)
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		logger.Fatal("%s", err)
 	}
 }
 
 func init() {
-	log.SetFlags( log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile )
-	
-	cobra.OnInitialize(initConfig)
 
-	cobra.OnInitialize(initPgClient)
+	cobra.OnInitialize(initConfig)
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.hundun.yaml)")
 
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
+
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -86,8 +85,8 @@ func initConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			logger.Fatal("%s", err)
+			os.Exit(-1)
 		}
 
 		// Search config in home directory with name ".hundun" (without extension).
@@ -103,28 +102,20 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		logger.Info("Using config file:", viper.ConfigFileUsed())
 	}
 	err := viper.Unmarshal(&hundunConfig)
 	if err != nil {
-		log.Fatalf("unable to marshal config to YAML: %v", err)
+		logger.Fatal("unable to marshal config to YAML: %v", err)
 	}
-
 
 	if hundunConfig.Pagerduty.ApiKey == "" || hundunConfig.Pagerduty.Url == "" {
-		log.Fatalf("Please make sure your config file has api key and pagerduty api url to connect to.")
+		logger.Fatal("Please make sure your config file has api key and pagerduty api url to connect to.")
 	}
-}
 
-func initPgClient() {
-	log.Printf("Pagerduty client initializing..")
-	log.Printf("\nApi key: %s \nUrl: %s", hundunConfig.Pagerduty.ApiKey, hundunConfig.Pagerduty.Url)
-
-	pgclient = &pg.PgClient{
-		ApiKey:   hundunConfig.Pagerduty.ApiKey,
-		Endpoint: hundunConfig.Pagerduty.Url,
-		Email: hundunConfig.Pagerduty.Email,
-	}
-	pgclient.Init()
+	pgclient = pg.NewPgClient(hundunConfig.Pagerduty.ApiKey,
+		hundunConfig.Pagerduty.Url,
+		hundunConfig.Pagerduty.Email,
+		verbose)
 
 }

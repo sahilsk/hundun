@@ -28,12 +28,7 @@ import (
 var priorityCmd = &cobra.Command{
 	Use:   "priority",
 	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  `Get priority detail out of a priority id`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("priority called")
 		iv, err := pgclient.Get("priorities", priorityParams.id)
@@ -42,7 +37,7 @@ to quickly create a Cobra application.`,
 		}
 		priority := iv.(ps.PriorityResponse)
 
-		log.Printf("%+v", priority)
+		logger.Info("%+v", priority)
 		priorityStr, err := json.MarshalIndent(priority, "", "  ")
 		if err != nil {
 			log.Fatalf("%s", err)
@@ -59,7 +54,7 @@ var priorityParams PriorityParams
 
 func init() {
 	describeCmd.AddCommand(priorityCmd)
-	priorityCmd.Flags().StringVar(&priorityParams.id, "id", "", "Incident id")
+	priorityCmd.Flags().StringVar(&priorityParams.id, "id", "", "priority id")
 
 	// Here you will define your flags and configuration settings.
 

@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -53,9 +54,9 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	logger = log.NewLogger(verbose)
 	if err := rootCmd.Execute(); err != nil {
-		logger.Fatal("%s", err)
+		fmt.Printf("Error executing root: %s", err)
+		os.Exit(-1)
 	}
 }
 
@@ -77,6 +78,9 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+
+	logger = log.NewLogger(verbose)
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -117,5 +121,4 @@ func initConfig() {
 		hundunConfig.Pagerduty.Url,
 		hundunConfig.Pagerduty.Email,
 		verbose)
-
 }

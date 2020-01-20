@@ -71,5 +71,5 @@ var ackParams AckParams
 
 func init() {
 	rootCmd.AddCommand(ackCmd)
-	ackCmd.Flags().StringVar(&ackParams.incidentID, "id", "", "Incident id")
+	ackCmd.Flags().StringVarP(&ackParams.incidentID, "incident_id", "i", "", "Incident id")
 }

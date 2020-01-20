@@ -9,8 +9,9 @@ type Clogger struct {
 }
 
 func NewLogger(verbose bool) *Clogger {
-	if !verbose {
-		log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
+	if verbose {
+		//log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
+		log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
 	}
 	return &Clogger{verbose: verbose}
 }

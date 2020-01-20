@@ -121,3 +121,27 @@ func (d *Dialer) Put(endpoint string, params url.Values, body []byte) ([]byte, e
 	defer res.Body.Close()
 	return printAndReturn(res.Body, res.StatusCode)
 }
+
+/**
+ * @var		d	*Diale
+ * @global
+ */
+func (d *Dialer) Post(endpoint string, params url.Values, body []byte) ([]byte, error) {
+	requestURL := fmt.Sprintf("%s?%s", endpoint, params.Encode())
+
+	logger.Info("(POST)Dailing url: %s", requestURL)
+	logger.Info("Payload: %s", string(body))
+
+	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewReader(body))
+
+	if err != nil {
+		return nil, err
+	}
+	req.Header = d.HeaderList
+	res, err := d.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	return printAndReturn(res.Body, res.StatusCode)
+}

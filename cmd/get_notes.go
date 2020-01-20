@@ -16,17 +16,17 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/url"
 
+	ps "github.com/sahilsk/hundun/pgclient/schema"
 	"github.com/spf13/cobra"
 )
 
-// resolveCmd represents the resolve command
-var resolveCmd = &cobra.Command{
-	Use:   "resolve",
+// notesCmd represents the notes command
+var notesCmd = &cobra.Command{
+	Use:   "notes",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -35,51 +35,40 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("resolve called")
+		logger.Info("notes called")
 
-		incidentResolvePayloadJSON := []byte(fmt.Sprintf(`
-		{
-			"incident": {
-			  "type": "incident_reference",
-			  "status": "resolved",
-			  "resolution": "%s"
-			}
-		}
-		`, resolveParams.resolution))
+		iv, err := pgclient.ListChild("incidents", "notes", notesParams.IncidentId, url.Values{})
 
-		incident, err := pgclient.Put("incidents", resolveParams.incidentID, url.Values{}, incidentResolvePayloadJSON)
+		noteList := iv.(ps.Notes)
+
+		//Print pretty json
+		data, _ := noteList.ToPrettyString()
+
+		fmt.Printf("%s", string(data))
 		if err != nil {
-			log.Fatalf("Error: %s", err)
+			log.Fatalf("Can't pull note list: %s", err)
 		}
-
-		log.Printf("%+v", incident)
-		incidentStr, err := json.MarshalIndent(incident, "", "  ")
-		if err != nil {
-			log.Fatalf("%s", err)
-		}
-		log.Print(string(incidentStr))
 	},
 }
 
-type ResolveParams struct {
-	incidentID string
-	resolution string
+type NotesParams struct {
+	IncidentId string
 }
 
-var resolveParams ResolveParams
+var notesParams NotesParams
 
 func init() {
-	rootCmd.AddCommand(resolveCmd)
-	resolveCmd.Flags().StringVarP(&resolveParams.incidentID, "incident_id", "i", "", "Incident id")
-	resolveCmd.Flags().StringVarP(&resolveParams.resolution, "resolution", "r", "", "The resolution for this incident.")
+	getCmd.AddCommand(notesCmd)
+
+	notesCmd.Flags().StringVarP(&notesParams.IncidentId, "incident_id", "i", "", "Incident id")
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// resolveCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// notesCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// resolveCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// notesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

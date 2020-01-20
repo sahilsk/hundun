@@ -78,7 +78,8 @@ func (p *PgClient) List(entity string, filters url.Values) (interface{}, error) 
 		return nil, errors.New("no entity defined")
 	}
 
-	body, err := p.Dialer.Get(fmt.Sprintf("%s/%s", p.Endpoint, entity), filters)
+	requestURL := fmt.Sprintf("%s/%s", p.Endpoint, entity)
+	body, err := p.Dialer.Get(requestURL, filters)
 	if err != nil {
 		return nil, err
 	}
@@ -91,13 +92,42 @@ func (p *PgClient) List(entity string, filters url.Values) (interface{}, error) 
 				logger.Info("%s", err)
 			}
 		}
-		return incidents, nil
+		return incidents, err
 	case "priorities":
 		var priorities ps.Priorities
 		if err := json.Unmarshal(body, &priorities); err != nil {
 			logger.Info("%s", err)
 		}
 		return priorities, err
+	default:
+		return nil, errors.New("Unsupported entity")
+	}
+
+}
+
+func (p *PgClient) ListChild(parent_entity string, child_entity string,
+	identifier string, filters url.Values) (interface{}, error) {
+
+	if parent_entity == "" {
+		return nil, errors.New("no parent entity defined")
+	}
+	if child_entity == "" {
+		return nil, errors.New("no child entity defined")
+	}
+
+	requestURL := fmt.Sprintf("%s/%s/%s/%s", p.Endpoint, parent_entity, identifier, child_entity)
+	body, err := p.Dialer.Get(requestURL, filters)
+	if err != nil {
+		return nil, err
+	}
+
+	switch child_entity {
+	case "notes":
+		var notes ps.Notes
+		if err := json.Unmarshal(body, &notes); err != nil {
+			logger.Info("%s", err)
+		}
+		return notes, err
 	default:
 		return nil, errors.New("Unsupported entity")
 	}
@@ -164,6 +194,33 @@ func (p *PgClient) Put(entity string, id string, params url.Values, payload []by
 			logger.Info("%s", err)
 		}
 		return priority, nil
+	default:
+		return nil, errors.New("Unsupported entity")
+	}
+}
+
+func (p *PgClient) PostChild(parent_entity string, child_entity string, id string, params url.Values, payload []byte) (interface{}, error) {
+
+	if parent_entity == "" {
+		return nil, errors.New("no parent entity defined")
+	}
+	if child_entity == "" {
+		return nil, errors.New("no child entity defined")
+	}
+	requestURL := fmt.Sprintf("%s/%s/%s/%s", p.Endpoint, parent_entity, id, child_entity)
+
+	body, err := p.Dialer.Post(requestURL, params, payload)
+	if err != nil {
+		return nil, err
+	}
+
+	switch child_entity {
+	case "notes":
+		var note ps.Note
+		if err := json.Unmarshal(body, &note); err != nil {
+			logger.Info("%s", err)
+		}
+		return note, err
 	default:
 		return nil, errors.New("Unsupported entity")
 	}

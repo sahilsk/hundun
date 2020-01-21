@@ -40,3 +40,10 @@ To ack incident
 
     hundun get notes -i "abcd"
 
+
+
+## Alientvault
+
+    hundun describe avalarm -a "3cc9e726-0edb-e178-2520-0aa8ba5236fb"
+
+

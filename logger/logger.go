@@ -35,7 +35,6 @@ func (c *Clogger) Debug(format string, args ...interface{}) {
 }
 
 func (c *Clogger) Fatal(format string, args ...interface{}) {
-	if c.verbose {
-		log.Fatalf(format, args)
-	}
+	log.Fatalf(format, args)
+
 }

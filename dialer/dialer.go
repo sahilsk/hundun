@@ -70,7 +70,7 @@ func printAndReturn(r io.Reader, sc int) ([]byte, error) {
 	if sc > 399 {
 		return nil, errors.New(fmt.Sprintf("(StatusCode: %d: %s", sc, string(body)))
 	} else {
-		logger.Info(string(body))
+		logger.Info("%s", body)
 	}
 
 	return body, err

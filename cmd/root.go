@@ -20,6 +20,7 @@ import (
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
+	av "github.com/sahilsk/hundun/avclient"
 	c "github.com/sahilsk/hundun/config"
 	log "github.com/sahilsk/hundun/logger"
 	pg "github.com/sahilsk/hundun/pgclient"
@@ -31,6 +32,7 @@ var cfgFile string
 
 var hundunConfig c.HundunConfig
 var pgclient *pg.PgClient
+var avclient *av.AVClient
 var verbose bool
 var logger *log.Clogger
 
@@ -120,5 +122,9 @@ func initConfig() {
 	pgclient = pg.NewPgClient(hundunConfig.Pagerduty.ApiKey,
 		hundunConfig.Pagerduty.Url,
 		hundunConfig.Pagerduty.Email,
+		verbose)
+
+	avclient = av.NewAVClient(hundunConfig.Alienvault.ApiKey, hundunConfig.Alienvault.Url,
+		hundunConfig.Alienvault.Cookie,
 		verbose)
 }

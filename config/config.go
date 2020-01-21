@@ -5,7 +5,8 @@ package config
  * @global
  */
 type HundunConfig struct {
-	Pagerduty PagerdutyConfiguration `mapstructure:"pagerduty"`
+	Pagerduty  PagerdutyConfiguration   `mapstructure:"pagerduty"`
+	Alienvault AlientVaultConfiguration `mapstructure:"alienvault"`
 }
 
 /**
@@ -16,4 +17,10 @@ type PagerdutyConfiguration struct {
 	ApiKey string `mapstructure:"api_key"`
 	Url    string `mapstructure:"url"`
 	Email  string `mapstructure:"email"`
+}
+
+type AlientVaultConfiguration struct {
+	ApiKey string `mapstructure:"api_key"`
+	Url    string `mapstructure:"url"`
+	Cookie string `mapstructure:"cookie"`
 }

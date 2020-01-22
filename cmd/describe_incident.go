@@ -55,8 +55,9 @@ var incidentParams IncidentParams
 
 func init() {
 	describeCmd.AddCommand(incidentCmd)
-	incidentCmd.Flags().StringVar(&incidentParams.incidentID, "id", "", "Incident id")
+	incidentCmd.Flags().StringVarP(&incidentParams.incidentID, "incident_id", "i", "", "Incident id")
 
+	incidentCmd.MarkFlagRequired("incident_id")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

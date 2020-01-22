@@ -108,7 +108,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		logger.Info("Using config file:", viper.ConfigFileUsed())
+		logger.Info("Using config file: %s", viper.ConfigFileUsed())
 	}
 	err := viper.Unmarshal(&hundunConfig)
 	if err != nil {
@@ -117,6 +117,10 @@ func initConfig() {
 
 	if hundunConfig.Pagerduty.ApiKey == "" || hundunConfig.Pagerduty.Url == "" {
 		logger.Fatal("Please make sure your config file has api key and pagerduty api url to connect to.")
+	}
+
+	if hundunConfig.Alienvault.ApiKey == "" || hundunConfig.Alienvault.Cookie == "" || hundunConfig.Alienvault.Url == "" {
+		logger.Fatal("Please make sure your config file has alienvault api key or cookie, and url.")
 	}
 
 	pgclient = pg.NewPgClient(hundunConfig.Pagerduty.ApiKey,

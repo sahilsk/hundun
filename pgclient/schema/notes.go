@@ -2,6 +2,7 @@ package schema
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 )
 
@@ -20,10 +21,34 @@ type User struct {
 	Entity
 }
 
-func (n *Notes) ToPrettyString() ([]byte, error) {
-	return json.MarshalIndent(*n, "", "  ")
+func (n *Notes) ToPrettyString() string {
+	b, err := json.MarshalIndent(*n, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
 }
 
-func (n *Notes) ToString() ([]byte, error) {
-	return json.Marshal(*n)
+func (n *Notes) ToString() string {
+	b, err := json.Marshal(*n)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
+}
+
+func (n *Note) ToPrettyString() string {
+	b, err := json.MarshalIndent(*n, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
+}
+
+func (n *Note) ToString() string {
+	b, err := json.Marshal(*n)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
 }

@@ -72,7 +72,7 @@ func init() {
 	rootCmd.AddCommand(resolveCmd)
 	resolveCmd.Flags().StringVarP(&resolveParams.incidentID, "incident_id", "i", "", "Incident id")
 	resolveCmd.Flags().StringVarP(&resolveParams.resolution, "resolution", "r", "", "The resolution for this incident.")
-
+	resolveCmd.MarkFlagRequired("incident_id")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

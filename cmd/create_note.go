@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/url"
@@ -54,11 +53,7 @@ to quickly create a Cobra application.`,
 		note := iv.(ps.Note)
 
 		logger.Info("%+v", note)
-		noteStr, err := json.MarshalIndent(note, "", "  ")
-		if err != nil {
-			log.Fatalf("%s", err)
-		}
-		log.Print(string(noteStr))
+		fmt.Printf("%s", note.ToPrettyString())
 
 	},
 }
@@ -75,7 +70,8 @@ func init() {
 
 	noteCmd.Flags().StringVarP(&createNoteParams.Content, "content", "c", "", "note content")
 	noteCmd.Flags().StringVarP(&createNoteParams.IncidentId, "incident_id", "i", "", "incident id")
-
+	noteCmd.MarkFlagRequired("incident_id")
+	noteCmd.MarkFlagRequired("content")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

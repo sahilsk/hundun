@@ -38,16 +38,13 @@ to quickly create a Cobra application.`,
 		logger.Info("notes called")
 
 		iv, err := pgclient.ListChild("incidents", "notes", notesParams.IncidentId, url.Values{})
-
+		if err != nil {
+			log.Fatal("Can't pull note list: %s", err)
+		}
 		noteList := iv.(ps.Notes)
 
-		//Print pretty json
-		data, _ := noteList.ToPrettyString()
+		fmt.Printf("%s", noteList.ToPrettyString())
 
-		fmt.Printf("%s", string(data))
-		if err != nil {
-			log.Fatalf("Can't pull note list: %s", err)
-		}
 	},
 }
 
@@ -61,6 +58,7 @@ func init() {
 	getCmd.AddCommand(notesCmd)
 
 	notesCmd.Flags().StringVarP(&notesParams.IncidentId, "incident_id", "i", "", "Incident id")
+	notesCmd.MarkFlagRequired("incident_id")
 
 	// Here you will define your flags and configuration settings.
 

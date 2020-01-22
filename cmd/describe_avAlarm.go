@@ -40,7 +40,8 @@ to quickly create a Cobra application.`,
 		}
 		avalarm := iv.(avs.Alarm)
 		logger.Info("%v", avalarm)
-		fmt.Printf("%v", avalarm)
+
+		fmt.Printf("%s", avalarm.ToPrettyString())
 	},
 }
 
@@ -62,4 +63,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	avAlarmCmd.Flags().StringVarP(&avalarm_params.AlarmId, "alarm_id", "a", "", "alarm id")
+	avAlarmCmd.MarkFlagRequired("alarm_id")
 }

@@ -72,4 +72,6 @@ var ackParams AckParams
 func init() {
 	rootCmd.AddCommand(ackCmd)
 	ackCmd.Flags().StringVarP(&ackParams.incidentID, "incident_id", "i", "", "Incident id")
+	ackCmd.MarkFlagRequired("incident_id")
+
 }

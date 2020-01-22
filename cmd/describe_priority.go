@@ -54,7 +54,8 @@ var priorityParams PriorityParams
 
 func init() {
 	describeCmd.AddCommand(priorityCmd)
-	priorityCmd.Flags().StringVar(&priorityParams.id, "id", "", "priority id")
+	priorityCmd.Flags().StringVarP(&priorityParams.id, "priority_id", "p", "", "priority id")
+	priorityCmd.MarkFlagRequired("priority_id")
 
 	// Here you will define your flags and configuration settings.
 
